@@ -13,7 +13,7 @@ This is some example  text. It is good to have an example
 (base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ mv best_text some_text
 (base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ ls
 more_examples	some_text
-(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ rm -r -i more_example/
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ rm -r -i more_examples/
 examine files in directory more_example/? yes
 remove more_example//some_text? yes
 remove more_example/? yes
