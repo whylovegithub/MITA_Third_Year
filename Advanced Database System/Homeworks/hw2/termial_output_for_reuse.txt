@@ -1,0 +1,32 @@
+(base) wanghaoyudeMacBook-Pro:~ ouhiroshisakai$ pwd
+/Users/ouhiroshisakai
+(base) wanghaoyudeMacBook-Pro:~ ouhiroshisakai$ cd Desktop/example
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ pwd
+/Users/ouhiroshisakai/Desktop/example
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ mkdir more_examples
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ ls
+more_examples	some_text
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ cat some_text
+This is some example  text. It is good to have an example
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ cp some_text best_text
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ cp some_text more_examples/
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ mv best_text some_text
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ ls
+more_examples	some_text
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ rm -r -i more_example/
+examine files in directory more_example/? yes
+remove more_example//some_text? yes
+remove more_example/? yes
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ echo "Grep takes two arguments, a string (or string pattern) to search for in in file, and one ore more filenames.  Instead of specifying the file, the data to search can be piped into grep from the output of another command."
+Grep takes two arguments, a string (or string pattern) to search for in in file, and one ore more filenames.  Instead of specifying the file, the data to search can be piped into grep from the output of another command.
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$ history|grep nano
+  493  nano some_text
+  514  history|grep nano
+(base) wanghaoyudeMacBook-Pro:example ouhiroshisakai$
+
+
+
+
+
+
+
