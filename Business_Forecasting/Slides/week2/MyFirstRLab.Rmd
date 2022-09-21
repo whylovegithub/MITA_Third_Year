@@ -1,0 +1,112 @@
+---
+title: "Tutorial 1"
+author: "pronak@business.rutgers.edu"
+date: "9/10/2022"
+output: html_document
+---
+
+# Creating a Data Frame
+
+```{r}
+# Create Data Frame
+
+Name <- c("Ronak","Sam","Joe","Mary","Jane","Sally")
+Age <- c(21,24,20,15,19,22)
+Gender <- c("M","M","M","F","F","F")
+GPA <- c(3.7,2.9,3.1,4.0,3.4,3.5)
+myDataFrame <- data.frame(Name,Age,Gender,GPA)
+myDataFrame
+
+# Explore Data Frame
+names(myDataFrame)
+ncol(myDataFrame)
+nrow(myDataFrame)
+dim(myDataFrame)
+head(myDataFrame)
+tail(myDataFrame)
+str(myDataFrame)
+class(myDataFrame$Gender)
+myDataFrame$Gender <- as.factor(myDataFrame$Gender)
+class(myDataFrame$Gender)
+str(myDataFrame)
+# Column
+myDataFrame$Age
+myDataFrame[2]
+myDataFrame[c("Age")]
+myDataFrame[2:3]
+myDataFrame[c("Age","Gender")]
+# Rows
+myDataFrame[2,]
+
+# Combined
+myDataFrame[2:3,c("Age")]
+myDataFrame[2:3,2:3]
+
+#Levels
+
+myDataFrame$Gender
+table(myDataFrame$Gender)
+table(myDataFrame$Age)
+table(myDataFrame$Age, myDataFrame$Gender)
+
+# Filtering
+
+myDataFrame[myDataFrame$Gender == "M",]
+
+# Ordering
+
+myDataFrame[order(myDataFrame$Age),]
+myDataFrame[order(-myDataFrame$Age),]
+
+# Change Column Name
+names(myDataFrame)[4] <- "Grade"
+head(myDataFrame)
+names(myDataFrame)[4] <- "GPA"
+head(myDataFrame)
+
+# Changing Age for Ronak
+myDataFrame [1,2] <- 31
+head(myDataFrame)
+myDataFrame$Age[1] <- 33
+head(myDataFrame)
+
+# Graphing
+barplot(myDataFrame$Age)
+barplot(myDataFrame$Age, main = "Age of People", xlab = "People", ylab = "Age", col = "Blue", names.arg = myDataFrame$Name)
+pie(myDataFrame$Age)
+pie(myDataFrame$Age,label = myDataFrame$Name, main = "Age of People")
+stem(myDataFrame$GPA)
+stem(myDataFrame$Age)
+hist(myDataFrame$Age)
+boxplot(myDataFrame$Age)
+boxplot(myDataFrame$Age,myDataFrame$Gender)
+
+## Summary Stats
+
+min(myDataFrame$Age)
+max(myDataFrame$Age)
+range(myDataFrame$Age)
+StatRange = max(myDataFrame$Age) - min(myDataFrame$Age)
+StatRange
+mean(myDataFrame$Age)
+sd(myDataFrame$Age)
+var(myDataFrame$Age)
+sqrt(var(myDataFrame$Age))
+fivenum(myDataFrame$Age)
+IQR(myDataFrame$Age)
+quantile(myDataFrame$Age)
+summary(myDataFrame$Age)
+boxplot.stats(myDataFrame$Age)
+boxplot.stats(myDataFrame$Age)$out
+
+# Data Frame Summary
+
+summary(myDataFrame)
+
+by(myDataFrame$Age,myDataFrame$Gender,mean)
+by(myDataFrame$Age,myDataFrame$Gender,sd)
+by(myDataFrame$Age,myDataFrame$Gender,summary)
+
+aggregate(myDataFrame$Age,list("Type" = myDataFrame$Gender),median)
+aggregate(myDataFrame$Age,list("Type" = myDataFrame$Gender),summary)
+```

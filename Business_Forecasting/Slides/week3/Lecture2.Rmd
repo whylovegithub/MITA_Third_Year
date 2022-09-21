@@ -1,0 +1,89 @@
+---
+title: "Lecture3"
+author: "pronak@business.rutgers.edu"
+date: "9/18/2022"
+output: html_document
+---
+## Components of a Time Series
+
+* Horizontal: Stable with few deviation 
+* Trend : Long-term increase or decrease in the data
+* Cyclical : Affected by seasonal factors such as the time of the year or the day of the week. Seasonality is always of a fixed and known frequency
+* Seasonal : Data exhibit rises and falls that are not of a fixed frequency
+
+
+## Coveriance 
+
+$$COV(X,Y) = \frac{\sum_{x=1}^{n}(x_{t}-\overline{x})(y_{t}-\overline{y})}{n}$$
+
+## Correlation
+
+$$\rho  = \frac{\sum(x_{t}-\overline{x})(y_{t}-\overline{y})}{\sqrt{\sum(x_{t}-\overline{x})^2}\sqrt{\sum(y_{t}-\overline{y})^2}}$$
+
+
+
+## Auto-Correlation
+For K = 0,1,2
+$$r_{k} = \sum_{t=k+1}^{n}\frac{(Y_{t}-\overline{Y})*(Y_{t-k}-\overline{Y})}{\sum(Y_{t}-\overline{Y})^2}$$
+
+* Generally, as the number of time legs (K) increases, the magnitude of auto-correlation coefficients decreases. 
+* A correlogram  or a auto-correlation graph is auto-correlation for various lags of a time series
+
+### Uses of Auto-Correlation
+
+* Is our data Stationary?
+* Does our data have a Trend?
+* Is our data Random?
+* Is our data Seasonal? 
+
+
+## Residual Error
+
+It is the difference between Observed and Predicted Value
+$e_t = Y_t - \hat{Y}$
+
+A good forecasting model will have the following properties for Residual Error
+
+* They are uncorrelated (Acf)
+* They have a mean of 0 (histogram)
+* They have constant variance (histogram)
+* They are normally distributed (histogram)
+
+
+## Forecast Model Accuracy
+
+* Mean Absolute Error  $MAE = \frac{\sum_{t=1}^{n}|e_t|}{n}$
+* Mean Squared Error $MSE = \frac{\sum_{t=1}^{n}e_t^2}{n}$
+* Root Mean Squared Error $\sqrt{MSE}$
+* Mean Absolute Percent Error $MAPE = \frac{\sum_{t=1}^{n}\frac{|e_t|}{Y_{t}}*100}{n}$
+* Mean Percent Error $MPE = \frac{\sum_{t=1}^{n}\frac{e_t}{Y_{t}}*100}{n}$
+```{r}
+library(fpp)
+library(fpp2)
+plot(melsyd[,"Economy.Class"])
+plot(a10)
+Acf(elec)
+Acf(ausbeer)
+
+# Random Plot
+
+set.seed(30)
+y <- ts(rnorm(50))
+plot(y)
+Acf(y)
+
+# Residuals
+
+tmp <- HoltWinters(ausbeer)
+attributes(tmp)
+plot(tmp)
+tmp_f <- forecast(tmp)
+attributes(tmp_f)
+plot(tmp_f$residuals)
+hist(tmp_f$residuals)
+Acf(tmp_f$residuals)
+accuracy(tmp_f)
+```
+
+
+

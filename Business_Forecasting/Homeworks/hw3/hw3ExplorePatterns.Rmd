@@ -1,0 +1,81 @@
+---
+title: "hw3"
+output:
+  pdf_document: default
+  html_document: default
+date: "2022-09-21"
+---
+
+---
+We are gonna explore xxx dataset from fpp
+#### package loading
+```{r }
+library(fpp)
+library(fpp2)
+```
+####showing exesisting dataset.
+```{r }
+data()
+```
+####Explore the dataset of UKgas.
+```{r }
+window(UKgas)
+str(UKgas)
+plot(UKgas)
+Acf(UKgas)
+Pacf(UKgas)
+```
+
+In figure1 we can see that all the lines showing a nice trending with no sudden drop and increase over time means that we can use the whole data set instead shorten its periodicity. We can see that in the UK gas usage between 1960 and 1987 auto correlation in figure2, there is a strong coefficient in the gap of 4 quarters(a year). And since it is all positive and dropping, we can say that it has a likely growing seasonal trend. However, this still need further exploration. 
+
+####Models
+As the figure 2 and figure 3 showed above, the coefficient are significant at lag of 4 in ACF and tail off in PACF, we should use MA models.
+
+```{r }
+UKgasHotltWinters<- HoltWinters(ausbeer)
+attributes(UKgasHotltWinters)
+plot(UKgasHotltWinters)
+##we can see that the predictions have generally small errors.
+```
+
+```{r }
+UKgasHotltWintersForecast <- forecast(UKgasHotltWinters)
+attributes(UKgasHotltWintersForecast)
+head(UKgasHotltWintersForecast$residuals,20)
+## "guess": the first row of residuals empty because the forecast use the 1956 data as a start point to put into the model to do calculation so that there is no prediction of 1956's data which create void.
+plot(UKgasHotltWintersForecast$residuals)
+```
+####Display the Histogram of prediction's residuals
+
+we can see that the distribution of the residuals has a mean close to 0, completely random,and since the graph doesn't have severe skewed so that it have a constant std deviation.
+```{r }
+hist(UKgasHotltWintersForecast$residuals)
+summary(UKgasHotltWintersForecast$residuals)
+```
+####Residuals' pattern
+Now we should find that our prediction's residuals have a pattern or not.
+```{r }
+Acf(UKgasHotltWintersForecast$residuals)
+```
+
+We can see that our residual don't have seasonality.
+
+####Showing the Accuracies.
+Personaly, I think MAPE and RMSE are in resonable range.
+```{r }
+accuracy(UKgasHotltWintersForecast)
+```
+
+```{r }
+
+```
+
+```{r }
+
+```
+
+```{r }
+
+```
+
+
