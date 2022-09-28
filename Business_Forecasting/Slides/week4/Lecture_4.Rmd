@@ -1,0 +1,171 @@
+---
+title: "Lecture 4"
+author: "pronak@business.rutgers.edu"
+date: "9/25/2022"
+output: html_document
+---
+
+## Forecasting Methods
+
+### Naive Method
+* Called the "no-change" forecast
+* Serves as a good "benchmark"
+* Limited to ingenuity of the forecaster
+
+$$
+\begin{aligned}
+\hat{Y}_{t+1} = Y_t \\
+\hat{Y}_{t+1} = Y_t + |Y_t - Y_{t-1}| \\
+\hat{Y}_{t+1} = Y_t  * \frac{Y_t}{Y_{t-1}} \\
+\hat{Y}_{t+1} = Y_{t-3}
+\end{aligned}
+$$
+
+
+### Averages
+
+* Average of past observation
+* Forecast can decide the weights and past observations that goes into the forecast
+* Inexpensive way to update daily,weekly, or short-term forecast
+
+#### Simple Average assigned equal weight to all observations
+
+$$
+\begin{aligned}
+\hat{Y}_{t+1} = \frac{\sum_{i=i}^{t}Y_i}{t} \\
+\hat{Y}_{t+2} = \frac{(t*\hat{Y}_{t})+Y_{t+1}}{t+1}
+\end{aligned}
+$$
+
+#### Moving Average 
+
+* Assigns equal weight to few observations
+* Does not handle seasonality well
+* MA(k) is Moving Average of order k, where k observations are part of the forecast model
+* The smaller the k, the larger the weight given to recent period
+* A small k is most desirable when there are sudden shifts
+* A large k is desirable when there are wide infrequent fluctuations 
+* The larger the order, the greater the smoothing effect
+
+
+$$
+\hat{Y}_{t+1} = \frac{\sum_{i=t-k+1}^{t}Y_i}{k}
+$$
+
+#### Double Moving Average
+
+* Accounts for Trends
+
+$$
+\begin{aligned}
+\hat{Y}_{t+p} = A_t + B_t*p \\
+A_t = M_t +(M_t - \hat{M}_t) = 2M_t - \hat{M}_t \\
+B_t = \frac{2}{k-1}*(M-t - \hat{M}_t) \\
+\hat{M}_t = \frac{\sum_{i=t-k+1}^{t}M_i}{k} \\
+M_t = \hat{Y}_{t-1} = \frac{\sum_{i=t-k+1}^{t}Y_i}{k}
+\end{aligned}
+$$
+
+### Exponential Smoothing
+
+* Best for short-term forecast where there is no predictable upwards or downwards trend. 
+* Idea is to estimate the current level and revise estimate was more recent data comes in. 
+* The weight of alpha is assigned to the recent observation
+* the weight decreases exponentially for observations in the past
+
+$$
+\begin{aligned}
+\hat{Y}_{t+1} = \alpha Y_t + \alpha (1 - \alpha)Y_{t-1}+ \alpha (1- \alpha )^2 Y_{t-2} + \dots \\
+\hat{Y}_{t+1} = \alpha Y_t + (1 - \alpha) \hat{Y}_{t} \\
+\hat{Y}_{t+1} = \alpha Y_t + (Y_{t} - \hat{Y}_{t})
+\end{aligned}
+$$
+
+### Holt
+
+* Used for data with trend 
+* It called __double exponential smoothing__ since we have to estimate current level and slope for trend
+
+$$
+\begin{aligned}
+\hat{Y}_{t+p} = l_t + \rho * T_t \\
+l_t = \alpha Y_t + (1 - \alpha) (l_{t-1} + T_{t-1}) \\
+T_{t} = \beta (l_t - l_{t-1}) + (1 - \beta)T_{t-1}
+\end{aligned}
+$$
+
+### Winters
+
+* Builds on Holt's equation by accounting for seasonality
+* There are three equation to account for level, trend, and seasonality. 
+
+$$
+\begin{aligned}
+\hat{Y}_{t+p} = (l_t * \rho * T_t) * S_{t-s+p} \\
+l_t = \alpha \frac{Y_t}{S_{t-s}} + (1 - \alpha) (l_{t-1} + T_{t-1}) \\
+T_{t} = \beta (l_t - l_{t-1}) + (1 - \beta)T_{t-1} \\
+S_{t-s+ \rho} = \gamma \frac{Y_t}{l_t} + ( 1 - \gamma)S_{t-s}
+\end{aligned}
+$$
+
+
+```{r}
+library(fpp)
+library(fpp2)
+library(TTR)
+
+attributes(elecequip)
+plot(elecequip)
+Acf(elecequip)
+
+#take Mean of all available history
+
+mean_forecast <- meanf(elecequip,5)
+plot(mean_forecast)
+
+# Naive
+naive_forecast <- naive(elecequip,5)
+plot(naive_forecast)
+
+# Random Walk
+rwf_forecast <- rwf(elecequip,5)
+rwf_forecast <- rwf(elecequip,5, drift=TRUE)
+# Seasonal Naive
+snaive_forecast <- snaive(elecequip,5)
+
+# Moving Averages
+
+MA5_forecast <- ma(elecequip,order=5)
+MA9_forecast <- ma(elecequip,order=9)
+
+# plot all in a single chart
+plot(mean_forecast)
+lines(naive_forecast$mean,col="red")
+lines(rwf_forecast$mean,col="green")
+lines(snaive_forecast$mean,col="black")
+lines(MA5_forecast,col="Pink")
+lines(MA9_forecast,col="Blue")
+# what other attributes are there?
+attributes(naive_forecast)
+
+# Decomposition
+ets_forecast <- ets(elecequip)
+plot(ets_forecast)
+attributes(ets_forecast)
+ets_forecast$mse
+# HoltWinters
+HW_forecast <- HoltWinters(elecequip)
+plot(HW_forecast)
+SSE_Simple <- HoltWinters(elecequip,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+head(SSE_Simple$fitted)
+
+#Forecast
+forecast_ets_1 <- forecast.ets(ets_forecast, h=5)
+plot(forecast_ets_1)
+forecast_ets_2 <- forecast(ets_forecast, h=5)
+plot(forecast_ets_2)
+```
+
