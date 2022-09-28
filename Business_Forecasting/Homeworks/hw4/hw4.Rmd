@@ -1,0 +1,143 @@
+---
+title: "hw4"
+author: "Haoyu(Michael)_Wang"
+date: '2022-09-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### package loading
+We are still using UKgas data set from hw3.
+```{r }
+library(fpp)
+library(fpp2)
+library(TTR)
+```
+
+
+
+#### 
+Attribute shows that it is a TS data from 1960 - 1986, the plot of UKgas showing a growing trend and increase over time means that we can use the whole data set instead shorten its periodicity. The acf shows a huge seasonality possiblity. So how should we properly predict the values in the future?
+```{r }
+attributes(UKgas)
+plot(UKgas)
+Acf(UKgas)
+```
+
+
+
+
+#### Basic mean.
+In here, since the data is quarterly recorded and the atf shows a huge coefficient at 4, I think we should use h=4 to meanf() it.
+```{r }
+UKgas
+
+meanUKgas <- meanf(UKgas,4)
+
+plot(meanUKgas)
+```
+
+
+
+
+#### Naive
+
+```{r }
+naiveUKgas <- naive(UKgas,4)
+
+plot(naiveUKgas)
+
+```
+
+
+
+
+#### random walk
+
+```{r }
+rwfUKgas <- rwf(UKgas,4)
+rwfUKgas <- rwf(UKgas,4, drift=TRUE)
+#A variation on the naive method is to allow the forecasts to increase or decrease over time, where the amount of change over time (called the drift) is set to be the average change seen in the historical data. 
+rwfUKgasDriftOff <- rwf(UKgas,4, drift=FALSE)
+plot(rwfUKgas)
+plot(rwfUKgasDriftOff)
+#Here we can see that the prediction when drift off is completely flat.
+```
+
+
+
+
+#### Seasonal Naive
+
+```{r }
+snaiveUKgas <- snaive(UKgas,4)
+```
+
+
+
+
+#### Moving Average
+
+```{r }
+fourMAUKgas <- ma(UKgas,order=4)
+sevenMAUKgas <- ma(UKgas,order=7)
+```
+
+
+
+
+#### Ploting everying
+
+```{r }
+plot(meanUKgas)
+lines(naiveUKgas$mean,col="red")
+lines(rwfUKgas$mean,col="green")
+lines(snaiveUKgas$mean,col="orange")
+lines(fourMAUKgas,col="Pink")
+lines(sevenMAUKgas,col="Blue")
+```
+
+
+
+
+#### Tearing apart the graph.
+
+```{r }
+etsUKgas <- ets(UKgas)
+plot(etsUKgas)
+attributes(etsUKgas)
+#showing mse
+etsUKgas$mse
+#We can see that the mean is not around 0 and right skewed. Errors are high around 1970s, probably caused by the gas crisis and administration change in UK which makes the model failed to capture the trending so that the MSE is so high.
+plot(etsUKgas$residuals)
+hist(etsUKgas$residuals)
+
+
+```
+
+
+
+
+#### HoltWinters
+
+```{r }
+
+hwUKgas <- HoltWinters(UKgas)
+plot(hwUKgas)
+
+SSE_Simple <- HoltWinters(UKgas,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+head(SSE_Simple$fitted)
+
+#Forecast
+forecast_ets_1 <- forecast.ets(etsUKgas, h=4)
+plot(forecast_ets_1)
+forecast_ets_2 <- forecast(etsUKgas, h=4)
+plot(forecast_ets_2)
+UKgas2<-UKgas
+```
