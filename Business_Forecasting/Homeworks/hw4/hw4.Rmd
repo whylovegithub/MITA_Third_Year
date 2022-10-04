@@ -2,7 +2,9 @@
 title: "hw4"
 author: "Haoyu(Michael)_Wang"
 date: '2022-09-28'
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -139,5 +141,6 @@ forecast_ets_1 <- forecast.ets(etsUKgas, h=4)
 plot(forecast_ets_1)
 forecast_ets_2 <- forecast(etsUKgas, h=4)
 plot(forecast_ets_2)
-UKgas2<-UKgas
+
 ```
+
