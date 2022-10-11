@@ -1,0 +1,72 @@
+---
+title: "hw5"
+output:
+  pdf_document: default
+  html_document: default
+date: "2022-10-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+library(fpp)
+library(fpp2)
+##We are still  using  the UKgas dataset
+head(UKgas)
+plot(UKgas)
+#STL Decompose a time series into seasonal, trend and irregular components using loess, acronym STL.
+#periodic = identical across years
+stl_decomp <- stl(UKgas,s.window ="periodic")
+?stl
+#we can see that the trend is obviously positive of all time(>100) and show a increasing trend this means that the gas usage in UK is increasing with a growing speed.
+#seasonal show a steady wave like graph which indicates that there is no seasonal variation over time.
+#remainder are generally  bigger in the left and right hand side,  but much smaller near 1975 which means that the seasonal and trend component are  more  accurate near 1975.
+plot(stl_decomp)
+attributes(stl_decomp)
+
+#apply seasonal adjust.
+seasadj(stl_decomp)
+attributes(seasadj(stl_decomp))
+# Plot a line on the graph
+plot(UKgas)
+lines(seasadj(stl_decomp), col="Red")
+# Default period forecast
+f_stl <- forecast(stl_decomp)
+# you can pass the # of period
+f_stl <- forecast(stl_decomp,h=15)
+f_stl
+plot(f_stl)
+
+### try period after 1975
+gasA1975 <- window(UKgas, start=c(1975, 1), end=c(1986, 4))
+stl_gasA1975 <- stl(gasA1975,s.window ="periodic")
+plot(stl_gasA1975)
+seasadj(stl_gasA1975)
+plot(gasA1975)
+lines(seasadj(stl_gasA1975), col="Red")
+# Default period forecast
+f_stl1975 <- forecast(stl_gasA1975)
+# you can pass the # of period
+f_stl1975 <- forecast(stl_gasA1975,h=15)
+f_stl1975
+plot(f_stl1975)
+attributes(f_stl1975)
+
+# There is more than one way to do things
+attributes(UKgas)
+window(UKgas)
+#cut from 1975
+str(UKgas)
+gasA1975 <- window(UKgas, start=c(1975, 1), end=c(1986, 4))
+str(gasA1975)
+decompose_uk <- decompose(gasA1975)
+
+plot(decompose_uk)
+attributes(decompose_uk)
+seasadj(decompose_uk)
+plot(gasA1975)
+lines(seasadj(decompose_uk), col="Blue")
+
+```
