@@ -1,0 +1,157 @@
+---
+title: "Midterm"
+author: "Haoyu(Michael)_Wang"
+date: '2022-10-25'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+####Import data 
+####Plot and interface
+The plot below shows that there is a growing trend because the  observations are highly correlated and significantly different than 0 for first several time-legs and then gradually drops. There is no seasonality since that we can not find a pattern in the plot also auot-crrelation figure shows that the correlation are generally the same with different time legs. Otherwise it should shows strong correlationship at seasonal legs or multiple seasonal legs. Since that there is a sudden drop around 2010 and without a fixed period, so that should be a cyclical pattern.
+```{r }
+library(fpp)
+library(fpp2)
+library(readr)
+NJ_MedianListingPrice_AllHomes <- read_csv("C:/Users/whylo/Desktop/MITA_Third_Year/Business_Forecasting/Homeworks/midterm/NJ_MedianListingPrice_AllHomes.csv")
+NJ_Home_Raw <- NJ_MedianListingPrice_AllHomes$Value
+NJ_Home_TS <- ts(NJ_Home_Raw,frequency = 12, start = c(1996,4))
+window(NJ_Home_TS)
+plot(NJ_Home_TS)
+
+plot(etsNJhome)
+```
+
+####Central Tendency
+By using the summary we can see that the MIN:142900, Max:373100, Mean:263499, Median:280200,box plot bellow.
+What we can summarize from the summary besides the max, min, etc, is that the box plot shows no outliars which could be a problem when we do prediction and mean is lower than median.
+
+
+```{r }
+summary(NJ_Home_TS)
+boxplot(NJ_Home_TS)
+```
+
+####Decomposition
+1.There is hard to tell that there is a seasonal patter or not due to lack of data since there is also hard to see a stable pattern of change that appears periodically and repeats. Also, significant auto-correlation coefficient will occur at seasonal legs or multiple seasonal legs but the correlation are all significant.
+2.additive Model. Since the seasonal variation is relatively constant over time for the real estate market.
+3.
+4.Dec is the highest and Jan is the lowest. The reason why could be nobody want to move during winter the price will drop during winter, and With summer being the busiest moving time of the year, people buy more aggressively than in the winter
+
+
+
+```{r }
+stl_decomp <- stl(NJ_Home_TS,s.window ="periodic")
+plot(stl_decomp)
+plot(acf(NJ_Home_TS))
+attributes(stl_decomp)
+library("fpp2")
+##
+
+##
+seasadj(stl_decomp)
+attributes(seasadj(stl_decomp))
+plot(NJ_Home_TS)
+lines(seasadj(stl_decomp), col="Red")
+```
+
+####Naive 
+1.output figure below
+2.1 The plot did not show a clear patter not random but around 0.
+  2 The histogram shows that a normal distribution, not skewed.
+  3.
+  4 actual value vs residual shows that a patter of residual goes with values instead of random.
+  5.Plot shows a increasing pattern without seasonality.
+3.Mean Absolute Error,Mean Squared Error,Root Mean Squared Error,Mean Absolute Percent Error,Mean Percent Error
+4.The accuracy is 
+
+```{r }
+naiveNJ <- naive(NJ_Home_TS)
+plot(naiveNJ)
+resNaive <- residuals(naiveNJ)
+plot(resNaive)
+hist(resNaive)
+resNaive
+#3
+skipFirstRes <- window(resNaive, start=c(1996, 5), end=c(2017, 7))
+skipFirstNJ <- window(NJ_Home_TS, start=c(1996, 6), end=c(2017, 8))
+plot(skipFirstNJ,skipFirstRes)
+#4
+skipFirstRes <- window(resNaive, start=c(1996, 5), end=c(2017, 8))
+skipFirstNJ <- window(NJ_Home_TS, start=c(1996, 5), end=c(2017, 8))
+plot(skipFirstNJ,skipFirstRes)
+#5
+acf(skipFirstRes)
+###
+df<-data.frame(Y=as.matrix(skipFirstRes))
+absRes <- abs(df)
+#mae
+sum(absRes)/nrow(df)
+#mse
+#sum(abs^2)/nrow(df)
+#rmse
+#sqrt(sum(abs*abs)/nrow(df))
+naiveNJ <- naive(NJ_Home_TS)
+plot(naiveNJ)
+naiveNJ
+
+```
+
+####Simple Moving Averages
+
+The curve become smoother.
+
+```{r }
+plot(NJ_Home_TS)
+MA3_forecast <- ma(NJ_Home_TS,order=3)
+MA6_forecast <- ma(NJ_Home_TS,order=6)
+MA9_forecast <- ma(NJ_Home_TS,order=9)
+lines(MA3_forecast,col="Red")
+lines(MA6_forecast,col="Blue")
+lines(MA9_forecast,col="Green")
+
+```
+
+####Simple Smoothing
+1. a =0.999, the Value of smoothing parameter for the level after smoothing
+2. inital = 143613.077 
+3.sigma:  1867.933
+4.1 The plot did not show a clear patter not random but around 0.
+  2 The histogram shows that a normal distribution, not skewed.
+```{r }
+sesNJ <- ses(NJ_Home_TS,h=12)
+plot(sesNJ)
+attributes(sesNJ)
+sesNJ$model
+resSes <-sesNJ$residuals
+plot(resSes)
+hist(resSes)
+```
+
+
+
+
+####Holt-Winters 
+1.    alpha 0.9741216 
+2. beta 1
+3.gama 1 
+```{r }
+HW_forecast <- HoltWinters(NJ_Home_TS)
+plot(HW_forecast)
+attributes(HW_forecast)
+HW_forecast$alpha
+HW_forecast$beta
+HW_forecast$gamma
+```
+
+
+
+####Simple Smoothing
+
+```{r }
+
+
+```
