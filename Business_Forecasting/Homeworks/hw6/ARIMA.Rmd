@@ -1,0 +1,42 @@
+---
+title: "ARIMA"
+author: "pronak@business.rutgers.edu"
+date: "11/8/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+
+library(fpp)
+library(fpp2)
+library(forecast)
+
+gasA1975 <- window(UKgas, start=c(1975, 1), end=c(1986, 4))
+
+
+ndiffs(gasA1975)
+tsdisplay(gasA1975)
+gasA1975diff1 <- diff(gasA1975, differences=1)
+plot(gasA1975)
+
+
+plot(gasA1975diff1)
+tsdisplay(gasA1975diff1)
+auto_fit <- auto.arima(gasA1975, trace=TRUE, stepwise = FALSE)
+auto_fit
+attributes(auto_fit)
+plot(forecast(auto_fit,h=5,level=c(99.5)))
+#Residual Analysis
+Acf(auto_fit$residuals)
+#no lag showing high correlation
+Box.test(residuals(auto_fit), lag=20, type="Ljung")
+#The test statistic of the test the p-value of the test is 0.8394, which is much larger than 0.05. Thus, we fail to reject the null hypothesis of the test and conclude that the data values are independent.
+Box.test(residuals(auto_fit), lag=10, type="Ljung")
+plot.ts(residuals(auto_fit))
+#plot is likely normal distribution and random but the histagram shows a right skewed distribution.
+hist(auto_fit$residuals)
+tsdiag(auto_fit)
+
+```
