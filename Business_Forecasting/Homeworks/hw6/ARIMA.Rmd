@@ -16,18 +16,17 @@ library(forecast)
 gasA1975 <- window(UKgas, start=c(1975, 1), end=c(1986, 4))
 
 
-ndiffs(gasA1975)
-tsdisplay(gasA1975)
-gasA1975diff1 <- diff(gasA1975, differences=1)
 plot(gasA1975)
+nsdiffs(gasA1975)
+ndiffs(gasA1975)
+ndiffs((diff(gasA1975,4)))
+tsdisplay(diff(diff(gasA1975,4)))
 
-
-plot(gasA1975diff1)
-tsdisplay(gasA1975diff1)
-auto_fit <- auto.arima(gasA1975, trace=TRUE, stepwise = FALSE)
+auto_fit <- auto.arima(gasA1975,trace=TRUE, stepwise = FALSE )
 auto_fit
 attributes(auto_fit)
-plot(forecast(auto_fit,h=5,level=c(99.5)))
+
+
 #Residual Analysis
 Acf(auto_fit$residuals)
 #no lag showing high correlation
