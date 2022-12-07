@@ -1,0 +1,267 @@
+---
+title: "Midterm"
+author: "Haoyu(Michael)_Wang"
+date: '2022-10-25'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+####Import data 
+####Plot and interface
+
+```{r }
+library(fpp)
+library(fpp2)
+library(readr)
+
+IPG3113N <- read_csv("C:/Users/whylo/Desktop/MITA_Third_Year/Business_Forecasting/Homeworks/final/IPG3113N.csv")
+candy_ts <- ts(IPG3113N$IPG3113N,frequency = 12,start=c(2012,10))
+plot(candy_ts)
+
+```
+
+####Central Tendency
+By using the summary we can see that the MIN:82.48, Max:130.29, Mean:106.19, Median:105.62,box plot bellow.
+What we can summarize from the summary besides the max, min, etc, is that the box plot shows no outliars which could be an advantage since there is no data abnormal to affect the prediction and mean is a bit higher than median.
+
+
+```{r }
+summary(candy_ts)
+boxplot(candy_ts)
+```
+
+####Decomposition
+I would say based on the decomposition we can say that there is a seasonality. Also the acf graph that at lag 12 the data are highly correlated.
+I would say the decomposition are additive since that the magnitude of the seasonal fluctuations, or the variation around the trend-cycle, does not vary with the level of the time series. Personally we should cut the data since 2019/10 to avoid cyclical event.
+The monthly seasonal monthly indices are shown on the plot.
+The highest month is October, and the lowest month is July. And I think the reason behind why there is a burst need for candy is that people are prepare for the holiday. And people do not have to worry that after purchasing them they will melt during their way home.
+
+As the plot shows the seasonality is a big factor affects the candy market.
+
+```{r }
+stl_decomp <- stl(candy_ts,s.window ="periodic")
+Acf(candy_ts)
+candy_ts<-window(candy_ts, start=c(2019, 10), end=c(2022, 10))
+  stl_decomp <- stl(candy_ts,s.window ="periodic")
+plot(stl_decomp)
+de<-decompose(candy_ts)
+plot(de$figure, type="l")
+boxplot(candy_ts~cycle(candy_ts, xlab="Date"))
+##
+
+##
+seasadj(stl_decomp)
+attributes(seasadj(stl_decomp))
+plot(candy_ts)
+lines(seasadj(stl_decomp), col="Red")
+
+
+```
+
+####Naive 
+1.output figure below
+2.1 The plot did not show a clear pattern.And around 0.
+  2 The histogram shows that a bit left skewed distribution basically normal distributed.
+  3.The plot shows that the residual are not correlated to fitted value, since there is no pattern. But the residual greater than 0 a bit more
+  4 actual value vs residual shows that a patter of residual goes with values instead of random.
+  5.Plot shows a seasonality at lag of 12.
+3. 
+                ME    RMSE      MAE       MPE    MAPE      MASE
+Training set 0.5831472 7.58967 5.565397 0.2378962 5.25893 0.7455992
+                 ACF1
+Training set 0.254362
+4.
+5.The RMSE shows that on average the forecast value is 7.58967 away from actual.
+
+```{r }
+candy_ts_naive <- naive(candy_ts)
+attributes(candy_ts_naive)
+plot(candy_ts_naive)
+
+resNaive <- residuals(candy_ts_naive)
+
+plot(resNaive)
+hist(resNaive)
+checkresiduals(candy_ts_naive)
+resNaive
+#3
+plot.ts(candy_ts_naive$fitted, resNaive,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+#4
+plot.ts(candy_ts, resNaive,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+
+#5
+Acf(resNaive)
+#6
+accuracy(candy_ts_naive)
+#7
+naive(candy_ts,12)
+plot(naive(candy_ts,12))
+```
+
+####Simple Moving Averages
+
+The curve become smoother.
+
+```{r }
+plot(candy_ts)
+MA3_forecast <- ma(candy_ts,order=3)
+MA6_forecast <- ma(candy_ts,order=6)
+MA9_forecast <- ma(candy_ts,order=9)
+lines(MA3_forecast,col="Red")
+lines(MA6_forecast,col="Blue")
+lines(MA9_forecast,col="Green")
+
+forecast(MA9_forecast,12)
+plot(forecast(MA3_forecast,12))
+plot(forecast(MA9_forecast,12))
+accuracy(forecast(MA9_forecast,12))
+```
+
+####Simple Smoothing
+
+1. a =0.9999, after simple smoothing the Value of smoothing parameter for the level indicated that the simple smoothing is more like a naive model
+  l = 109.2924. the initial state value.
+  sigma:  7.6975
+2.1 The plot show a clear patter of random.
+  2 The histogram shows that left skewed distribution.
+  3.The plot shows that the residual are not correlated to fitted value, since there is no pattern. But the residual greater than 0 a bit more
+  4 actual value vs residual shows that a patter of residual goes with values instead of random.
+  5.Plot shows a seasonality at lag of 12.
+3.                ME     RMSE     MAE       MPE     MAPE      MASE      ACF1
+Training set 0.5675138 7.486596 5.41525 0.2315472 5.117019 0.7254839 0.2535938
+4.
+5.The RMSE shows that on average the forecast value is 7.486596 away from actual. And the model totally fails to fit the seasonality.
+```{r }
+sesNJ <- ses(candy_ts,h=9)
+
+sesNJ
+plot(sesNJ)
+attributes(sesNJ)
+sesNJ$model
+resSes <-sesNJ$residuals
+plot(resSes)
+hist(resSes)
+checkresiduals(candy_ts_naive)
+plot.ts(sesNJ$fitted, resSes,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+plot.ts(candy_ts, resSes,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+accuracy(sesNJ)
+forecast(sesNJ,12)
+plot(forecast(sesNJ,12))
+plot(forecast(sesNJ,12))
+
+```
+
+
+
+
+####Holt-Winters 
+1.alpha=0.01515244: the “base value”. Higher alpha puts more weight on the most recent observations.
+beta=1: the “trend value”. Higher beta means the trend slope is more dependent on recent trend slopes.
+gamma=1: the “seasonal component”. Higher gamma puts more weighting on the most recent seasonal cycles.
+the initial values are  level = 116.7369020, trend is 0.8372106. seasonal is 19.6843582, containing the estimated values for the level, trend and seasonal components
+2.1.the residual show at the beginning of the fitting due to adjustment of a,b,g, and then shows then a random residual around 0 
+  2.histogram shows a left skewed distribution.
+  3.The plot shows that the residual are not correlated to fitted value, since there is no pattern.
+  4 actual value vs residual shows  random.
+  5.Plot shows a seasonality at lag of 3.
+3.                ME    RMSE      MAE       MPE     MAPE      MASE      ACF1
+Training set 1.040598 4.22949 3.605025 0.9418385 3.343049 0.4829671 0.1615502
+4.
+5.The RMSE shows that on average the forecast value is 4.22949 away from actual. And it will keep growing with seasonality and trend.
+```{r }
+
+HW_forecast <- HoltWinters(candy_ts)
+plot(candy_ts)
+
+
+attributes(HW_forecast)
+?HoltWinters
+HW_forecast$alpha
+HW_forecast$beta
+HW_forecast$gamma
+HW_forecast$coefficients
+reshw <-residuals(HW_forecast)
+plot(reshw)
+hist(reshw)
+
+fit<-HW_forecast$fitted
+
+plot.ts(fit, reshw,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+plot.ts(candy_ts, reshw,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+Acf(reshw)
+accuracy(forecast(HW_forecast))
+
+
+forecast(HW_forecast,12)
+plot(forecast(HW_forecast,12))
+plot(forecast(HW_forecast,24))
+
+```
+
+####ARIMA or Box-Jenkins 
+1.it is stationary since it ndiff = 0.
+2.0
+3.no
+4.q=2,p=1
+5.sigma^2 estimated as 44.89:  log likelihood = -123.59,  aic = 257.18
+6.Best model: ARIMA(0,0,0)(0,1,0)[12] with drift  
+7.Best model: ARIMA(0,0,0)(0,1,0)[12] with drift 
+8.1.straight line at the begining and then becoming random around 2020/08
+  2.right skewed distributed.
+  3.random
+  4.random
+  5. no significant at any lag.
+6.
+                     ME     RMSE      MAE         MPE     MAPE      MASE      ACF1
+Training set 0.03087105 3.999392 2.878227 -0.03841036 2.653311 0.3855976 0.2289091
+7.The RMSE shows that on average the forecast value is 3.999392 away from actual. And it will keep growing with seasonality and trend.
+it will follow current pattern to grow
+```{r }
+plot(candy_ts)
+nsdiffs(candy_ts)
+ndiffs(candy_ts)
+tsdisplay(diff(diff(candy_ts,12)))
+Acf(diff(diff(candy_ts,12)))
+Pacf(diff(diff(candy_ts,12)))
+fit3 <- auto.arima(candy_ts,trace=TRUE, stepwise = FALSE )
+arima(candy_ts,order = c(1, 0, 2))
+#Residual Analysis
+plot(fit3$residuals)
+Acf(fit3$residuals)
+Box.test(residuals(fit3), lag=20, type="Ljung")
+plot.ts(residuals(fit3))
+hist(fit3$residuals)
+plot.ts(fit3$fitted, fit3$residuals,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+
+plot.ts(candy_ts, fit3$residuals,
+     pch = 19, frame = FALSE,xy.labels=FALSE)
+tsdiag(fit3)
+accuracy(fit3)
+forecast(fit3,12)
+plot(forecast(fit3,12))
+forecast(fit3,24)
+plot(forecast(fit3,24))
+```
+
+####Accuracy summary
+the Simple Moving average of order 9 yield the best result since it has the lowest RMSE, the worst is Simple Smoothing.
+
+```{r }
+accuracy(candy_ts_naive)
+accuracy(forecast(MA9_forecast))
+accuracy(sesNJ)
+accuracy(forecast(HW_forecast))
+accuracy(fit3)
+```
+####Conclusion
+After the accident happen in 2018, the time series shows a time series with increasing trend and stable seasonality. It is going to increase over the next year. And likely to grow since the food market is stable and economy crisis has less influence on it.
